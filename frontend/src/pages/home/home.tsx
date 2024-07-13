@@ -1,113 +1,91 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import "./examples.css";
+import { useContractUtils } from "@/app/hooks";
+import { useContext } from "react";
+import { dAppContext } from "@/Context/dappContext";
+// import { Button } from "@/components/ui/button";
+import { CONTRACT } from "@/app/consts";
+import { useAccount } from "@gear-js/react-hooks";
 import {
-    useContractUtils,
-} from '@/app/hooks';
-import { useContext } from 'react';
-import { dAppContext } from '@/Context/dappContext';
-import {  Button } from '@/components/ui/button';
-import { CONTRACT } from '@/app/consts';
-import { useAccount } from '@gear-js/react-hooks';
-import { 
-    NormalButtons,
-    VoucherButtons,
-    SignlessButtons,
-} from '@/components/ExampleComponents';
+  NormalButtons,
+  VoucherButtons,
+  SignlessButtons,
+} from "@/components/ExampleComponents";
+import { Flex, Heading, Input, Button, Text, Box } from "@chakra-ui/react";
 
+function Home() {
+  const { account } = useAccount();
+  const { currentVoucherId, setCurrentVoucherId, setSignlessAccount } =
+    useContext(dAppContext);
+  const { readState } = useContractUtils();
 
-function Home () {
-    const { account } = useAccount();
-    const { 
-        currentVoucherId,
-        setCurrentVoucherId,
-        setSignlessAccount
-    } = useContext(dAppContext);
-    const {
-        readState
-    } = useContractUtils();
+  const [pageSignlessMode, setPageSignlessMode] = useState(false);
+  const [voucherModeInPolkadotAccount, setVoucherModeInPolkadotAccount] =
+    useState(false);
+  const [contractState, setContractState] = useState("");
 
-    const [pageSignlessMode, setPageSignlessMode] = useState(false);
-    const [voucherModeInPolkadotAccount, setVoucherModeInPolkadotAccount] = useState(false);
-    const [contractState, setContractState] = useState("");
+  const [tokensReceived, setTokensReceived] = useState("");
 
-    useEffect(() => {
-        if (!account) {
-            setPageSignlessMode(true);
-        } else {
-            setPageSignlessMode(false);
-        }
-        if (setCurrentVoucherId) setCurrentVoucherId(null)
-    }, [account])
+  const [inputValue, setInputValue] = useState("");
+  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (
+    event
+  ) => {
+    setInputValue(event.target.value);
+  };
 
-    return (
-        <div className='examples-container'>
-            
-            <div className='examples'>
-                <div className='information'>
-                    <p>
-                        signless mode: { pageSignlessMode ? "Activated" : "disabled" }
-                    </p>
-                    <p>
-                        voucher active: { currentVoucherId ? "true" : "false" }
-                    </p>
-                    <p
-                        style={{
-                            maxWidth: "300px"
-                        }}
-                    >
-                        state: {contractState}
-                    </p>
-                </div>
-                <Button onClick={async () => {
-                    const contractState: any = await readState(
-                        CONTRACT.programId,
-                        CONTRACT.metadata,
-                        {
-                            LastWhoCallContract: null
-                        }
-                    );
+  function calculateTokensReceived(inputValue: number) {
+    const tokensReceived = (inputValue / 3).toString();
+    setTokensReceived(tokensReceived);
+  }
 
-                    setContractState(JSON.stringify(contractState));
+  useEffect(() => {
+    calculateTokensReceived(Number(inputValue));
+  }, [inputValue]);
 
-                }}>
-                    Read State
-                </Button>
-                <Button onClick={() => {
-                    if (setCurrentVoucherId) setCurrentVoucherId(null);
-                    if (setSignlessAccount) setSignlessAccount(null);
-                    setPageSignlessMode(!pageSignlessMode);
+  useEffect(() => {
+    if (!account) {
+      setPageSignlessMode(true);
+    } else {
+      setPageSignlessMode(false);
+    }
+    if (setCurrentVoucherId) setCurrentVoucherId(null);
+  }, [account]);
 
-                }}>
-                    toggle signless mode
-                </Button>
-                {
-                    !pageSignlessMode && (
-                        <Button onClick={() => {
-                            setVoucherModeInPolkadotAccount(!voucherModeInPolkadotAccount);
-                        }}>
-                            toggle voucher mode
-                        </Button>
-                    )
-                }
+  console.log("usdcAmount", inputValue);
 
-                {
-                    !pageSignlessMode && !voucherModeInPolkadotAccount && (
-                        <NormalButtons />
-                    )
-                }
+  return (
+    <Flex flexDir="column" justify="center">
+      <Heading alignSelf="center">Buy Bond</Heading>
+      <Flex alignSelf="center">
+        <Flex mt="4rem" justify="center">
+          <Box>
+            <Text>Input the amount of USDC that you want to spend</Text>
+            <Text ml="12rem">USDC Available:</Text>
+            <Flex mt="1rem" justify="center">
+              <Input
+                placeholder="USDC amount"
+                value={inputValue} // Controlled component
+                onChange={handleInputChange}
+              ></Input>
+              <Button>Buy Bond</Button>
+            </Flex>
+          </Box>
+        </Flex>
 
-                {
-                    pageSignlessMode && <SignlessButtons />
-                }
-
-                {
-                    !pageSignlessMode && voucherModeInPolkadotAccount && (
-                        <VoucherButtons />
-                    )
-                }
-            </div>
-        </div>
-    );
+        <Flex mt="4rem" flexDir="column" ml="2rem">
+          <Heading alignSelf="center">Bond Details</Heading>
+          <Text>Current market price: 4.1 USDC</Text>
+          <Text>Current bond price: 3.0 USDC</Text>
+          <Text>Bond Disscount: 30%</Text>
+          <Text>Vesting Period: 7 blocks</Text>
+        </Flex>
+      </Flex>
+      <Flex alignSelf="center" flexDir="column" mt="4rem" justify="center">
+        <Heading>You receive</Heading>
+        <Text fontSize="1.3rem">{tokensReceived} pTokens</Text>
+      </Flex>
+    </Flex>
+  );
 }
 
-export {Home };
+export { Home };
