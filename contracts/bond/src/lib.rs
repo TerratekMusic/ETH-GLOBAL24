@@ -25,7 +25,7 @@ extern fn init() {
 let config: InitBond = msg::load().expect("Unable to decode InitConfig");
 
 let bond = Bond {
-    owner: msg::sender(),
+    owner: msg::source(),
     stablecoin_address: config.stablecoin_address,
     price: config.price,
     ..Default::default()
@@ -40,21 +40,31 @@ async fn main() {
     let mut bond = unsafe { BOND.as_mut().expect("Bond not initialized") };
 
     let action: BondAction = msg::load().expect("Unable to decode BondAction");
+    let msg_source = msg::source();
 
     let result = match action {
-        BondAction::BuyBond(amount) => buy_bond(&mut bond, amount).await,
-        BondAction::LiberatePtokens(amount) => liberate_ptokens(&mut bond, amount).await,
+        BondAction::BuyBond(amount) => bond.buy_bond( msg_source, amount).await,
+        // BondAction::LiberatePtokens(amount) => liberate_ptokens(&mut bond, amount).await,
     };
 
     msg::reply(result,0).expect("Unable to send BondEvent");
 
 }
 
+#[no_mangle]
+extern fn state() {
+    let mut bond = unsafe { BOND.take().expect("Unexpected error in taking state") };
+   
+    msg::reply::<Bond>(bond.clone(), 0)
+        .expect("Failed to encode or reply with `LiquidityPool` from `state()`");
+    unsafe { BOND = Some(bond) };
+}
+
 impl Bond {
     async fn buy_bond(&mut self, user: ActorId, amount_in_stablecoin: u128) -> Result<BondEvent, Error> {
-        if amount_in_stablecoin == 0 {
-            return BondEvent::Err(Error::ZeroAmount);
-        }
+        // if amount_in_stablecoin == 0 {
+        //     return BondEvent::Err(Error::ZeroAmount);
+        // }
 
         let bond_holder = self.bond_holders.entry(user).or_insert(BondHolder {
              p_balance: 0,
@@ -62,9 +72,9 @@ impl Bond {
         });
 
         //crear logica para comprar bonos
-        if bond_holder.emmited {
-            return BondEvent::Err(Error::AlreadyEmmited);
-        }
+        // if bond_holder.emmited {
+        //     return BondEvent::Err(Error::AlreadyEmmited);
+        // }
         bond_holder.p_balance = amount_in_stablecoin / self.price;
 
 
@@ -73,7 +83,7 @@ impl Bond {
         let token_address = self.stablecoin_address;
         let result = self.transfer_tokens_to_contract(&token_address, amount_in_stablecoin).await?;
         msg::send(user, result, 0).expect("Msg failed");
-        Ok(BondEvent::BondBought(amount_in_stablecoin));
+        Ok(BondEvent::BondBought(amount_in_stablecoin))
 
     }
 
@@ -94,6 +104,10 @@ impl Bond {
         }
     }
 }
+
+
+
+   
 
 
 

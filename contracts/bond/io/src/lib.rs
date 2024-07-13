@@ -44,12 +44,14 @@ pub struct InitBond {
     pub price: u128,
 }
 
+#[derive(Debug, Clone, Encode, Decode, TypeInfo)]
 pub enum BondAction {
     BuyBond(u128),
-   LiberatePtokens(u128),
+    // LiberatePtokens(u128),
    
 }
 
+#[derive(Debug, Clone, Encode, Decode, TypeInfo)]
 pub enum BondEvent {
     Ok,
     Err,
