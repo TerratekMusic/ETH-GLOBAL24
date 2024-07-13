@@ -8,10 +8,12 @@ use io::{BondEvent, BondAction, FTAction, FTEvent, Error, BondHolder, InitBond};
 struct Bond {
     pub owner: ActorId,
     pub stablecoin_address: ActorId,
+    pub p_token_address: ActorId,
     pub bonds_emmited: u128,
+    pub price: u128,
+    pub vesting_time: u64,
     pub total_deposited: u128,
     pub bond_holders: BTreeMap<ActorId, BondHolder>,
-    pub price: u128,
 }
 
 const DECIMALS_FACTOR: u128 = 10_u128.pow(6);
@@ -68,7 +70,7 @@ impl Bond {
 
         let bond_holder = self.bond_holders.entry(user).or_insert(BondHolder {
              p_balance: 0,
-             emmited: false,
+             emmited: String::from("Not emmited tokens"),
         });
 
         //crear logica para comprar bonos

@@ -76,7 +76,7 @@ pub enum Error {
 #[derive(Debug, Clone, Encode, Decode, TypeInfo, Default)]
 pub struct BondHolder {
     pub p_balance: u128,
-    pub emmited: bool,
+    pub emmited: String,
        
 }
 
