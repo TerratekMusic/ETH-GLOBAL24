@@ -62,7 +62,10 @@ imp Bond {
             pub vesting_time: 0,
         });
 
-        let bond_holder = &mut self.bonding_holders;
+        let token_address = self.stablecoin_address;
+        let result = self.transfer_tokens_to_contract(&token_address, amount_in_stablecoin).await?;
+        msg::send(user, result, 0).expect("Msg failed");
+        Ok(LiquidityEvent::Deposited(amount_in_stablecoin))
 
     }
 
