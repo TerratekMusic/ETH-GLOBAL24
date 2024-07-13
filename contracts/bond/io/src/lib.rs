@@ -53,7 +53,7 @@ pub enum BondAction {
 pub enum BondEvent {
     Ok,
     Err,
-    BondPrice(u128),
+    BondBought(u128),
     Ptokens(u128),
     BondValue(u128),
     BondBalance(u128),
@@ -73,9 +73,8 @@ pub enum Error {
 #[derive(Debug, Clone, Encode, Decode, TypeInfo, Default)]
 pub struct BondHolder {
     pub p_balance: u128,
-    pub p_token: ActorId,
-    pub vesting_time: u64,
-   
+    pub emmited: bool,
+       
 }
 
 
@@ -97,6 +96,7 @@ pub struct IoGlobalState {
     pub p_token_address: ActorId,
     pub bonds_emmited: u128,
     pub price: u128,
+    pub vesting_time: u64,
     pub total_deposited: u128,
     pub bond_holders: BTreeMap<ActorId, BondHolder>,
 }

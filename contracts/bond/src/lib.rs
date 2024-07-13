@@ -58,14 +58,15 @@ imp Bond {
 
         let bond_holder = self.bond_holder.entry(user).or_insert(BondHolder {
             pub p_balance:0 ,
-            pub p_token:0,
-            pub vesting_time: 0,
+            pub emmited: false,
         });
+
+        
 
         let token_address = self.stablecoin_address;
         let result = self.transfer_tokens_to_contract(&token_address, amount_in_stablecoin).await?;
         msg::send(user, result, 0).expect("Msg failed");
-        Ok(LiquidityEvent::Deposited(amount_in_stablecoin))
+        Ok(BondEvent::BondBought(amount_in_stablecoin));
 
     }
 
