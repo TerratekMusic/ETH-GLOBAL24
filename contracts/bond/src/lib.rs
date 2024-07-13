@@ -77,7 +77,9 @@ impl Bond {
         // if bond_holder.emmited {
         //     return BondEvent::Err(Error::AlreadyEmmited);
         // }
-        bond_holder.p_balance = amount_in_stablecoin / self.price;
+        let p_tokens_deal = amount_in_stablecoin / self.price;
+
+        bond_holder.p_balance = bond_holder.p_balance.saturating_add(p_tokens_deal * DECIMALS_FACTOR)
 
 
         
