@@ -67,6 +67,7 @@ pub enum Error {
     InvalidAmount,
     UserNotFound,
     TransferFailed,
+    AlreadyEmmited,
 }
 
 

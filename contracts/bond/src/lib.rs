@@ -61,6 +61,13 @@ imp Bond {
             pub emmited: false,
         });
 
+        //crear logica para comprar bonos
+        if bond_holder.emmited {
+            return BondEvent::Err(Error::AlreadyEmmited);
+        }
+        bond_holder.p_balance = amount_in_stablecoin / self.price;
+
+
         
 
         let token_address = self.stablecoin_address;
@@ -69,38 +76,8 @@ imp Bond {
         Ok(BondEvent::BondBought(amount_in_stablecoin));
 
     }
+}
 
-    async fn liberate_ptokens(&mut self, amount: u128) -> BondEvent {
-        if amount == 0 {
-            return BondEvent::Err(Error::ZeroAmount);
-        }
 
-        let sender = msg::sender();
-        let holder = self.bonding_holders.get_mut(&sender).expect("User not found");
-
-        if holder.p_balance < amount {
-            return BondEvent::Err(Error::InvalidAmount);
-        }
-
-        let ft_action = FTAction::Transfer {
-            recipient: sender,
-            amount: amount,
-        };
-
-        let ft_event = exec::ft_transfer_call(ft_action).await.expect("FT transfer failed");
-
-        if let FTEvent::Transfer { sender, recipient, amount } = ft_event {
-            if sender != self.stablecoin_address || recipient != sender || amount != amount {
-                return BondEvent::Err(Error::TransferFailed);
-            }
-        }
-
-        holder.p_balance -= amount;
-        holder.price = self.calculate_price(&holder);
-        self.total_deposited -= amount;
-        self.bonds_emmited -= amount;
-
-        BondEvent::Ok
-    }
 
    
