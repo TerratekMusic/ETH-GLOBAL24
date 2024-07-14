@@ -1,10 +1,12 @@
-import { Link } from 'react-router-dom';
-import './logo.module.scss';
+import { Link } from "react-router-dom";
+import "./logo.module.scss";
+import { Image } from "@chakra-ui/react";
+import logo from "../../../../assets/images/SPBondLogoALPHA.png";
 
 function Logo() {
   return (
     <Link to="/">
-      <h1>LOGO</h1>
+      <Image w="10rem" src={logo}></Image>
     </Link>
   );
 }
