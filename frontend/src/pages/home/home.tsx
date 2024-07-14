@@ -12,7 +12,7 @@ import {
   decodeAddress,
 } from "@gear-js/api";
 import { CONTRACT } from "@/app/consts";
-import { useAccount, useApi } from "@gear-js/react-hooks";
+import { useAccount, useApi, useAlert } from "@gear-js/react-hooks";
 import {
   NormalButtons,
   VoucherButtons,
@@ -21,10 +21,7 @@ import {
 import { Flex, Heading, Input, Button, Text, Box } from "@chakra-ui/react";
 
 function Home() {
-  const { account } = useAccount();
-
   const [tokensReceived, setTokensReceived] = useState("");
-  const { api } = useApi();
 
   const [inputValue, setInputValue] = useState("");
   const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (
@@ -41,6 +38,12 @@ function Home() {
   useEffect(() => {
     calculateTokensReceived(Number(inputValue));
   }, [inputValue]);
+  //get USDC balance
+
+  const { api } = useApi();
+  const { account } = useAccount();
+
+  const alert = useAlert();
 
   const [balance, setBalance] = useState<any | undefined>(0);
 
