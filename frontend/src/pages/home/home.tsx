@@ -22,16 +22,9 @@ import { Flex, Heading, Input, Button, Text, Box } from "@chakra-ui/react";
 
 function Home() {
   const { account } = useAccount();
-  const { currentVoucherId, setCurrentVoucherId, setSignlessAccount } =
-    useContext(dAppContext);
-  const { readState } = useContractUtils();
-
-  const [pageSignlessMode, setPageSignlessMode] = useState(false);
-  const [voucherModeInPolkadotAccount, setVoucherModeInPolkadotAccount] =
-    useState(false);
-  const [contractState, setContractState] = useState("");
 
   const [tokensReceived, setTokensReceived] = useState("");
+  const { api } = useApi();
 
   const [inputValue, setInputValue] = useState("");
   const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (
@@ -49,25 +42,12 @@ function Home() {
     calculateTokensReceived(Number(inputValue));
   }, [inputValue]);
 
-  //template useEffect
-
-  useEffect(() => {
-    if (!account) {
-      setPageSignlessMode(true);
-    } else {
-      setPageSignlessMode(false);
-    }
-    if (setCurrentVoucherId) setCurrentVoucherId(null);
-  }, [account]);
-
-  //get USDC balance
   const [balance, setBalance] = useState<any | undefined>(0);
 
   const [fullState, setFullState] = useState<any | undefined>({});
 
   const Localbalances = fullState.balances || [];
 
-  //USDCV
   // Add your programID
   const programIDFT =
     "0xd8d0206ab4a4d0f26f80a28594e767d62bf1d5ff436c8c79e819a97399b7eaa7";
@@ -78,12 +58,9 @@ function Home() {
 
   const metadata = ProgramMetadata.from(meta);
 
-  const getBalance = async () => {
-    const api = await GearApi.create({
-      providerAddress: "wss://testnet.vara.network",
-    });
-    await api.programState
-      .read({ programId: programIDFT }, metadata)
+  const getBalance = () => {
+    api.programState
+      .read({ programId: programIDFT, payload: "" }, metadata)
       .then((result) => {
         setFullState(result.toJSON());
       })
@@ -101,9 +78,9 @@ function Home() {
 
   useEffect(() => {
     getBalance();
-  });
+  }, [account, balance]);
 
-  console.log("usdcAmount", inputValue);
+  console.log("Balance", balance);
 
   return (
     <Flex flexDir="column" justify="center">
