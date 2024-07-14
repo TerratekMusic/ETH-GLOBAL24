@@ -5,7 +5,12 @@ import { useContext } from "react";
 import { dAppContext } from "@/Context/dappContext";
 // import { Button } from "@/components/ui/button";
 import { web3FromSource } from "@polkadot/extension-dapp";
-import { ProgramMetadata, encodeAddress } from "@gear-js/api";
+import {
+  ProgramMetadata,
+  encodeAddress,
+  GearApi,
+  decodeAddress,
+} from "@gear-js/api";
 import { CONTRACT } from "@/app/consts";
 import { useAccount, useApi } from "@gear-js/react-hooks";
 import {
@@ -16,7 +21,6 @@ import {
 import { Flex, Heading, Input, Button, Text, Box } from "@chakra-ui/react";
 
 function Home() {
-  const { api } = useApi();
   const { account } = useAccount();
   const { currentVoucherId, setCurrentVoucherId, setSignlessAccount } =
     useContext(dAppContext);
@@ -74,8 +78,11 @@ function Home() {
 
   const metadata = ProgramMetadata.from(meta);
 
-  const getBalance = () => {
-    api.programState
+  const getBalance = async () => {
+    const api = await GearApi.create({
+      providerAddress: "wss://testnet.vara.network",
+    });
+    await api.programState
       .read({ programId: programIDFT }, metadata)
       .then((result) => {
         setFullState(result.toJSON());
